@@ -180,73 +180,111 @@ Often you also setup a **remote repository**, stored on an online platform like 
 
 Effective use of git includes two components: local software to manage the files on your computer (git client) and an online git hosting service to make them centrally accessible. While git is a single system, there is a variety of clients and a variety of hosts.
 
-In this course, we will primarily use Git GUI as the client. It is a simple client that is included with Git itself, and is language-agnostic. There are more graphical clients as well, including one integrated into RStudio itself, but these clients are outside the scope of this course. Note that Git is language-agnostic, and we will be using it with both R and Python, so it's best to learn the language-neutral GUI, rather than an R-specific GUI.
+In the virtual machine provided for you, we have three clients installed: the command line client (`git`), the basic and a bit old-fashioned Git GUI and a more modern Git Cola.
+The choice of client is up to you, and you can try them all out and even mix and match.
 
-```{block, type="alert alert-info"}
-**Tip**: For those who are comfortable with working from the Linux terminal, the command line client is often the most efficient choice. Knowing how to use git from the command line is also useful when working on cloud virtual machines/servers for big data processing. So in pro-tip boxes like this you will find command line equivalents to the GUI actions we will perform. Choose whichever way you find the most convenient for yourself.
+In this tutorial, we will cover Git Cola and the command line client.
+The command line client is by far the most efficient way to use Git.
+Knowing how to use git from the command line is also useful when working on cloud virtual machines/servers for big data processing.
+But you need to not be afraid to use the terminal, and know what commands to use.
+We have not covered how to use the terminal yet, but for now, you can follow along by opening the Terminal app and entering the given commands into it.
 
-In the [next tutorial](https://geoscripting-wur.github.io/Intro2Linux/) we will introduce you to more command line commands. 
-
-In addition, while this tutorial describes how to use the built-in `git-gui`, you can also use the more modern `git-cola`, which may be more intuitive to you. The general steps are the same as in `git-gui`. You can find Git Cola in the applications menu (or else you may need to install it).
-```
+There are more graphical clients as well, including one integrated into RStudio itself, but these clients are outside the scope of this course. Note that Git is language-agnostic, and we will be using it with both R and Python, so it's best to learn the language-neutral GUI, rather than an R-specific GUI.
 
 Throughout the Geoscripting course, for hosting our code, we will be using the university's very own instance of [GitLab](https://git.wur.nl), the most popular self-hosted Git hosting platform.
 
 Let's jump right into it! We will start by making our very own GitLab scripting project from scratch, and also try forking someone else's project.
 
-### Client setup
+### Account setup
 
-1. *Launch Git GUI*
+The first thing we need to do when starting to work with Git on a new device is to create a secure connection between it and the server we will be using to store our repositories.
+Git by itself does not handle security, and rather offloads that task to a program called `ssh`, which means **S**ecure **Sh**ell.
+SSH is the program you would use to connect to a remote computer using the command line, such as when working on a remote server.
+It requires the use of a pair of randomly generated keys to identify each device to each other.
 
-Launch a program called *Git GUI* (e.g. from the *Applications* → *Programming* menu). Git GUI is a graphical interface to Git that comes with Git itself, and is thus cross-platform and always available. When launched, it looks something like this:
+One key is the private key, it can be used to *decrypt* messages sent to your computer.
+The private key does not ever leave your computer and is never sent over the network.
+The public key is used to *encrypt* messages, and only the private key can be used to decrypt messages encrypted by your public key.
 
-![Main screen of Git GUI](figs/git_gui_main.png)
+You can think of the keys a bit like your online bank account.
+The private key is like the password to log into your online bank (but safer, as it never leaves your computer), whoever has it can use the money in the account.
+In contrast, the public key is like your bank account number.
+You can post it on your website and in social media, because the only thing that others can do with it is to send money to it.
+And if you send money to someone else, they can also use your public account number to verify that the money indeed came from you.
 
-```{block, type="alert alert-info"}
-**Note**: External users should [download git](https://git-scm.com/download/) and install it to obtain Git GUI.
+Therefore, the first step is to generate a key pair, and the second step is to register the public key in our Git hosting service (GitLab), so that you link your computer to your account.
 
-**Tip**: You can launch Git GUI from the terminal with `git gui`.
-```
+1. *Launch your key manager*
+
+You can create the key pair in three ways.
+The easiest graphical way to do it is to use the *Passwords and Keys* app.
+Click *Show Apps* at the bottom left and either click on *Utilities* → *Passwords and Keys*, or just start typing *Passwords* and hit Enter.
+
+![Utilities in Ubuntu 24.04](figs/noble-utilities.png)
 
 2. *Create an SSH key pair*
 
-In order for GitLab (and other services) to identify that the machine connecting to it is indeed owned by you, there are two options: using a password, or using an SSH key. SSH keys are much more secure than passwords, and it doesn't require you to enter a password every time you try to communicate with the server. Therefore throughout the course we will use SSH keys.
+Click on the `+` icon at the top left and select *Secure Shell key*.
 
-You can generate a new SSH key pair in Git GUI by going to *Help* → *Show SSH Key* and pressing the *Generate Key* button. It will ask you for a **passphrase**. This is **not a password** and is completely **optional**: it is useful in the case your SSH key is stolen, for instance by a thief stealing your laptop or a virus; however, SSH keys are specific to each machine and are never sent over the network, so most of the time it is completely fine to **leave the passphrase empty**. If you keep it empty, you will **not need to enter it every time** you try to push your changes, yet the connection will be even more secure than when using a password.
+![Passwords and Keys](figs/noble-seahorse.png)
 
+Give a description of your device, e.g. "VirtualBox for Geoscripting".
+Click *Generate*, and the app will ask you for a passphrase.
+A passphrase is an extra layer of security, where if someone manages to obtain your private key, they will not be able to use it without knowing your passphrase.
+In other words, it's encryption for your private key.
+It's useful to set a passphrase for keys that are on shared computers, because other users will then not be able to read it even if they manage to access the file.
+However, if you set a passphrase, you will have to enter it *every time that Git communicates with the server*.
+That will get quite annoying very quickly.
+Therefore, since you are working on your personal virtual machine, just keep the passphrase field empty.
+If someone *does* manage to somehow obtain your private key, you can always simply revoke your public key.
+
+Now double-click on the newly generated key, and click the copy button next to *Public Key*.
+
+![Copy the newly generated public key](figs/noble-public-key.png)
+
+
+
+```{block, type="alert alert-info"}
+**Note**: Passwords and Keys is only available in Linux (GNOME desktop environment). If you want to generate keys on other platforms, use any of the following methods.
+
+The first option is to use *Git GUI*. Git GUI is a graphical interface to Git that is developed together with Git itself, and is thus cross-platform. Windows users can obtain it by simply [downloading git](https://git-scm.com/download/) and installing it to obtain Git GUI.
+
+When launched, it looks something like this:
+
+![Main screen of Git GUI](figs/git_gui_main.png)
+
+You can generate a new SSH key pair in Git GUI by going to *Help* → *Show SSH Key* and pressing the *Generate Key* button.
 Once done, you will see your new public key:
 
 ![SSH public key generated](figs/git_gui_sshkey.png)
 
-```{block, type="alert alert-info"}
-**Tip**: From the command line you generate a key pair by running `ssh-keygen -t rsa -b 4096`. In both cases, by default the public key is stored in the file `~/.ssh/id_rsa.pub` (where `~` indicates the user's home directory).
-```
+The second option to generate keys is to use the terminal.
+This is especially useful if you are using a server without a GUI, or using a different Linux distribution or desktop environment. Simply run the command in the terminal: `ssh-keygen -t rsa -b 4096`
 
-### Account setup
+In all cases, by default the public key is stored in the file `~/.ssh/id_rsa.pub` (where `~` indicates the user's home directory).
+You can read it from the terminal by running: `cat ~/.ssh/id_rsa.pub`
+```
 
 Next, we will link our client with a Git host so that we can download and upload repositories.
 
 3. *Log into GitLab*
 
-Go to [GitLab](https://git.wur.nl/) and log in (using your **email address** as the user name and your password). You also need to set up two-factor authentication by going to [your profile page](https://git.wur.nl/-/profile/account).
+Go to [GitLab](https://git.wur.nl/) and log in (using the **WUR Single Sign On** button). You also need to set up two-factor authentication by going to [your profile page](https://git.wur.nl/-/profile/account).
 
-4. *Enrol the public key to your user account*
+4. *Enroll the public key to your user account*
 
-The SSH key pair is used to identify that you own the machine. <!--On WUR Windows PCs, the keys are stored on your *M:* drive, so they will follow you on any computer in the university.--> On WUR Linux virtual machines (VMs), the keys are stored on your personal VM, so you can access them from any computer that can access the VM.
+The SSH key pair is used to identify that you own the device.
+Now you need to tell GitLab about your new key. To do that, in GitLab click on your avatar in the top left and go to *Edit profile* → *SSH keys*. Click *Add new key*, paste the public key in the box, and press *Add key*.
 
-Now you need to tell GitLab about your new key. To do that, copy the public key from the dialog, then in GitLab click on your avatar in the top right and go to *Edit profile* → *SSH keys*. Paste the public key in the box, give it a title describing your machine, and press *Add key*. You might need to confirm the key by email for added security.
-
-This only has to be done once (per machine/OS you use GitLab on).
+This only has to be done once (per device/OS you use GitLab on).
 
 ### Creating a new repository
 
 5. *Create remote repository*
 
-Now we are ready to start making new repositories! In GitLab, press the "+" button at the top right, select *New repository/project* (GitLab uses both terms somewhat interchangeably) and *Create blank project*. Give it a descriptive name and a short description, choose the visibility of the repository and check *Initialize repository with a README*.
+Now we are ready to start making new repositories! In GitLab, press the "+" button at the top left, select *New project/repository* (GitLab uses both terms somewhat interchangeably) and *Create blank project*. Give it a descriptive name and a short description, choose the visibility of the repository and check *Initialize repository with a README*.
 
 ![New repository creation on GitLab](figs/GitLab-new-project.png)
-
-<!-- **Note:** During the course you are asked to submit answers to exercises as **separate projects**, using a specific scheme for the repository name: `Geoscripting-Exercise<id>-<team>` where `<id>` is the exercise number and `<team>` is your team name, for instance, `Geoscripting-Exercise3-TheGitters`. In addition, the visibility level **must** be set to *Private*. **Submissions that do not follow these rules may be rejected!** -->
 
 <!--Next, GitHub asks what software license you'd like to apply to your code, as we have discussed in the previous chapter. See [Choose a License](http://choosealicense.com/) for a quick overview of what licenses are available. Make sure to choose a license, otherwise basic copyright applies to your code.
 
@@ -260,114 +298,173 @@ On the tabs to the left, you can find that the repository can have issues and me
 
 ![Example issue on GitLab](figs/GitLab-issues.png)
 
-Next, check out the repository settings. Under the *Members* subtab of the *Project information* tab, you can invite other people to collaborate on your repository. Go ahead and invite your team member to be a collaborator with a maintainer role.
+Next, check out the repository settings. Under the *Members* subtab of the *Manage* tab, you can invite other people to collaborate on your repository. Go ahead and invite your team member to be a collaborator with a maintainer role.
 
 <!-- **Note:** During the course you are also required to add a staff member to your project with *Master* privileges before the submission deadline of each exercise in order for your exercise answer to be graded. The username of the staff member you need to add can be found on Blackboard. Do not share the repository with a group. **Submissions that do not follow this rule will be rejected!** -->
 
 7. *Get the URL of your new repository*
 
-Now that you have a remote repository, it's time to create a local repository that links to it! Open the main page of your new repository, click the blue *Clone* button at the top right of the page, and copy the *Clone with **SSH** * address of your new repository.
+Now that you have a remote repository, it's time to create a local repository that links to it! Open the main page of your new repository, click the blue *Code* button at the top right of the page, and copy the *Clone with **SSH** * address of your new repository.
 
 <!-- ![Clone or Download → Clone with SSH](figs/github_screenCapture.png) -->
 ![Blank GitLab repository](figs/GitLab-empty-repository.png)
 
 8. *Clone your repository*
 
-Go back to Git GUI, and press *Clone Existing Repository*. Paste the URL you just copied to the *Source Location* field, and choose a directory you want to store your code in in the *Target Directory* field. **Note**: the *Target Directory* must **not** already exist! Git GUI will create it for you.
+Let's first clone the repository using the *Git Cola* app.
+Open it from *Show Apps* at the bottom left.
+Press *Clone...* and paste the link you just copied into the box.
+Press *Clone* and select the directory you want to put the repository into.
+A subdirectory with the name of the repository will be created for you.
+After pressing *Open*, you will get a question about whether you trust the remote machine.
+You need to answer this with `yes` (the full word). This puts the GitLab server into a list of trusted servers, to guard against potential impostor servers.
 
-Once you click *Clone*, you will get a question about whether you trust the remote machine (if you ran `git gui` from a command line, it will appear stuck, but actually **the question will appear in the terminal** and you need to answer it there). You need to answer this with `yes` (the full word). This puts the GitLab server into a list of trusted servers, to guard against potential impostor servers.
+You will end up in an empty Git Cola window:
+
+![Git GUI in an empty directory](figs/git-cola.png)
+
+From the terminal, the same can be achieved with the `git clone` command (it will clone in your working directory, by default your user directory `~`), for example:
+```bash
+git clone git@git.wur.nl:masil001/geoscripting-git-test.git
+```
+
+The repository will be cloned into a subdirectory with a matching name. This is much faster than using any GUI!
+
+```{block, type="alert alert-info"}
+To clone using Git GUI, press *Clone Existing Repository*. Paste the URL you just copied to the *Source Location* field, and choose a directory you want to store your code in in the *Target Directory* field. **Note**: unlike in Git Cola, the *Target Directory* must **not** already exist! Git GUI will create it for you.
 
 You will end up in an empty Git GUI window:
 
 ![Git GUI in an empty directory](figs/git_gui_blank.png)
-
-```{block, type="alert alert-danger"}
-**Notice**: Sometimes Git GUI crashes or gets stuck at this stage. When you restart it, you may also find that the panes are collapsed (you need to drag them out from the borders of the window) and that the repository branch is set to `master` instead of `main`. To avoid this issue, and because it is much faster and more convenient in general, we recommend always cloning repositories from the terminal (see the next box), and then continuing to open the repository with Git GUI.
 ```
 
-```{block, type="alert alert-info"}
-**Tip**: From the terminal, `cd` into the directory you want to clone into, and run `git clone <url>`, e.g. `git clone git@git.wur.nl:you001/example.git`. The repository will be cloned into a subdirectory with a matching name. This is much faster than using any GUI!
+```{block, type="alert alert-danger"}
+**Notice**: Sometimes Git GUI crashes or gets stuck at this stage. When you restart it, you may also find that the panes are collapsed (you need to drag them out from the borders of the window) and that the repository branch is set to `master` instead of `main`. To avoid this issue, and because it is much faster and more convenient in general, we recommend always cloning repositories from Git Cola or the terminal.
 ```
 
 9. *Tell Git who you are*
 
-Before you start using Git, you should tell it what your name and email address is. You need to do that only once per Git installation. You should go to *Edit* → *Options...* and fill out the *Global (All Repositories)* options *User Name* and *Email Address*. These will be displayed on GitLab.
+Before you start using Git, you should tell it what your name and email address is. You need to do that only once per Git installation. You should go to *File* → *Preferences* (in Git GUI it's *Edit* → *Options...*) and fill out the options *User Name* and *Email Address* under *All Repositories* . These will be displayed in GitLab.
 
-```{block, type="alert alert-info"}
-**Tip**: To set your user name and email from the command line:
+You can also do that from the terminal:
 
-    git config --global user.name "Your Name"
-    git config --global user.email you@example.com
-
+```bash
+git config --global user.name "Your Name"
+git config --global user.email you@example.com
 ```
 
-### Working with Git GUI
+### Working with Git Cola
 
 10. *Make changes*
 
-To see Git in action, you need to make some changes in your repository. Try it by creating a new R script file in the directory where you cloned your new project.
+To see Git in action, you need to make some changes in your repository. Try it by creating a new file in the directory where you cloned your new project.
+You can do that using the *Text editor* (gedit), or from the terminal using the `touch` command.
 
-Once you are done, go back to Git GUI. If you closed the window, you can get back to your repository by launching Git GUI and clicking on its path in the *Open Recent Repository* list. If you did not close it, click the *Rescan* button. You will see some changes:
+Once you are done, go back to Git Cola. If you closed the window, you can get back to your repository by launching Git Cola and clicking on its path in the *list*. You will see some changes:
 
-![Changes pending in Git GUI](figs/git_gui_changes.png)
+![Changes pending in Git Cola](figs/git-cola-changes.png)
 
-```{block, type="alert alert-info"}
-**Tip**: To see a list of files with pending changes from the command line, use `git status` while in a git repository. To see what exactly changed in each of these files, use `git diff`.
+To see a list of files with pending changes from the command line, use `git status` while in a git repository. To see what exactly changed in each of these files, use `git diff`. For example:
+
+```bash
+# Go into our repository we just cloned
+cd geoscripting-git-test/
+# Get list of changed files
+git status
 ```
 
-At the top left corner, the *Unstaged Changes* panel, you can see all the files that changed in your workspace. If you click on the **name** of the file, the main panel will show you what changed since the last commit. Unless it is a non-text (data) file, in which case it will just note that something has changed. **Note**: Git is very efficient with storing changes in text files: these *diff* files are all it stores internally, it does not copy the whole file on each commit. However, it does not deal efficiently with non-text files, and thus you should limit the amount and size of such files as much as possible.
+```{block, type="alert alert-info"}
+Git GUI works equivalent to Git Cola, only that you need to press the *Rescan* button every time you want it to reload the list:
 
-If you click on the **icon** of the file in the *Unstaged Changes* panel, the file changes will be *staged* and appear at the *Staged Changes (Will Commit)* panel. These are the file changes you want to save and sent to GitLab. You don't have to stage all files for each commit, only those you actually want to be tracked by git. You can safely ignore some files such as manual backups, temporary files, and the like and they will remain untracked by git, as long as you never stage them. If you do want to stage everything, you can press the *Stage Changed* button. If you staged more than you wanted to, you can click on the file **icon** in the *Staged Changes* panel to unstage it.
+![Changes pending in Git GUI](figs/git_gui_changes.png)
+```
 
-Remember: clicking the **name** of the file shows the changes you made, clicking the **icon** of the file stages or unstages the change!
+At the top left corner, the *Status* panel, you can see all the files that changed in your workspace. If you click on the name of the file, the *Diff* panel will show you what changed in that file since the last commit. Unless it is a non-text (data) file, in which case it will just note that something has changed. **Note**: Git is very efficient with storing changes in text files: these *diff* files are all it stores internally, it does not copy the whole file on each commit. However, it does not deal efficiently with non-text files, and thus you should limit the amount and size of such files as much as possible.
+
+If you double-click on the name of the file in the *Untracked* category, the file changes will be *staged* and appear at the *Staged* category. These are the file changes you want to save and sent to GitLab. You don't have to stage all files for each commit, only those you actually want to be tracked by git. You can safely ignore some files such as manual backups, temporary files, and the like and they will remain untracked by git, as long as you never stage them. If you do want to stage everything, you can press the *Commit* → *Stage Modified* button. If you staged more than you wanted to, you can double-click on the file in the *Staged* panel to unstage it.
+
+To stage a change from the command line, use `git add` and a path to the file to stage To unstage, use `git restore --staged` and a path to the filename. For example:
+
+```bash
+# Stage
+git add hello.txt
+# Unstage
+git restore --staged hello.txt
+```
 
 ```{block, type="alert alert-info"}
-**Tip**: To stage a change from the command line, use `git add path/to/file.ext` where `path/to/file.ext` is the file you want to stage. To unstage, use `git reset HEAD path/to/file.ext`.
+Git GUI works similarly to Git Cola, but clicking the **name** of the file shows the changes you made, clicking the **icon** of the file stages or unstages the change.
 
-If you have files that you don't want git to track, you can add them into the `.gitignore` file. It could be the name of a file, a directory, a wildcard (e.g. `*.pdf`), or any combination of these. To list several, put them on separate lines.
+**Tip**: If you have files that you don't want git to track, you can add them into the `.gitignore` file. It could be the name of a file, a directory, a wildcard (e.g. `*.pdf`), or any combination of these. To list several, put them on separate lines.
 ```
 
 11. *Commit changes*
 
-Once you staged the files that you want to commit, you need to fill out the *commit message*. This is a brief description of what changes you made between the last commit and the one you are about to create. The **first line** you enter is the **title** of the commit, keep that one short. Subsequent lines are the **description**. You may notice that the *Commit message* box does not have a horizontal scrollbar: that is intentional, because your commit message should fit within that box without the need for scrolling. Use new lines to break the text.
+Once you staged the files that you want to commit, you need to fill out the *commit message*. This is a brief description of what changes you made between the last commit and the one you are about to create. The **top line** (commit summary) is the **title** of the commit, keep that one short. Subsequent lines (extended description) are the **description**. You may notice that there is a character counter at the top right which goes yellow if you exceed 65 characters on a line. that is intentional, because your commit message should fit within 65 characters per line for easy reading on the terminal. Use new lines to break longer sentences or paragraphs.
 
-If it is the first time you use Git GUI to make a commit, and you haven't filled out your user name and email, it might complain about it not knowing who you are. In that case go back to step 9.
+If it is the first time you use Git Cola to make a commit, and you haven't filled out your user name and email, it might complain about it not knowing who you are. In that case go back to step 9.
 
 Next press the *Commit* button and your commit will be saved locally. A commit is like a saved state: you are always able to roll back the contents of your tracked files to the state they were in when you committed the changes.
 
-```{block, type="alert alert-info"}
-**Tip**: To commit a change from the command line, use `git commit`. If you want to stage all tracked and changed files and commit, use `git commit -a`. To include a message with your commit you can use the commit command with a `-m` flag, for example: `git commit -m "added plots to webapp" `.
+To commit a change from the command line, use `git commit`. It will start a command line text editor so that you can write a commit message. If you want to stage all tracked and changed files and commit all in one step, use `git commit -a`. To include a message with your commit without using a text editor, you can use the commit command with the `-m` flag, for example:
+
+```bash
+git commit -m "Add a new file hello.txt"
 ```
 
-In the case you made a mistake (a mistake in the message, forgot to stage something, etc.), you can press the *Amend Last Commit* button and get right back to where you were when you made the last commit; but use this functionality very sparingly, as it does not work with changes that have already been pushed to GitLab.
 
 ```{block, type="alert alert-info"}
-**Tip**: To amend the last commit from the command line, use `git commit \-\-amend`.
+Git GUI works similarly, but the commit box is not separated into title and description. Rather, the title is the first line, and the subsequent lines are the description. The textbox is limited to 65 characters in width and has no scrollbar.
 ```
 
 10. *Push changes to the server*
 
-Press the *Push* button, and confirm the push, to send all your changes to your GitLab repository. You can now refresh the GitLab page to see your changes. Well done!
+Select *Actions* → *Push*, and confirm the push, to send all your changes to your GitLab repository. You can now refresh the GitLab page to see your changes. Well done!
 
 ![GitLab repository with content](figs/GitLab-repository.png)
 
-```{block, type="alert alert-info"}
-**Tip**: To push changes from the command line, use `git push`.
-```
+To push changes from the command line, type `git push`.
 
 11. *Pull changes from the server*
 
-One of the major uses of Git is collaboration and the ability to synchronise changes across different devices. Multiple users can do changes in the same Git repository (as long as you change the repository settings in GitLab to allow another user to do that), and you can work on the same code on different devices yourself. In both cases, it is important to keep all local repositories in sync with the remote repository. That is done via Git GUI by using *Fetch* and *Merge*. If you like, you can test it by cloning the same repository in another directory, making changes and pushing them to the server, then using fetch in the other copy.
+One of the major uses of Git is collaboration and the ability to synchronise changes across different devices. Multiple users can do changes in the same Git repository (as long as you change the repository settings in GitLab to allow another user to do that), and you can work on the same code on different devices yourself. In both cases, it is important to keep all local repositories in sync with the remote repository. That is done via Git Cola by using *Actions* → *Pull*.
 
-If there are any changes on GitLab that are not on your local copy yet, in Git GUI go to *Remote* → *Fetch from* → *origin* to download all changes. This will not apply them yet, however. 
+If you like, you can test it by cloning the same repository in another directory, making changes and pushing them to the server, then using pull in the other copy. If all goes well, the changes in the server will be applied to your local repository files.
 
-To attempt to apply the changes, go to *Merge* → *Local Merge...*. If all goes well, the changes will be applied.
+You can do the same on the command line with `git pull`.
 
 ```{block, type="alert alert-info"}
-**Tip**: To do a fetch and merge together the command line, use `git pull`.
+In Git GUI, it is slightly more complicated, as there is no pull button. Rather, a pull is a combination of a fetch and a merge. Therefore, you need to first do *Remote* → *Fetch from* → *origin*, followed by a  *Merge* → *Local merge...*.
 ```
 
-There may be cases where files go out of sync in incompatible ways, however, like two people editing one file at the same time. In that case you may hit a *merge conflict*. It is best to try to avoid them. In case it happens, you need to go through the conflicting files in a text editor and edit them by hand, keeping the parts of the files you need. The conflicting parts will be in between lines of of `>>>>` and `<<<<` symbols. Once you remove the parts you don't need (including the separators), you can solve the conflict by committing the changes.
+There may be cases where files go out of sync in incompatible ways, however, like two people editing one file at the same time. In that case you may hit a *merge conflict*. You will see a message such as:
+
+```
+From git.wur.nl:masil001/geoscripting-git-test
+   9179eca..6b7ea60  main       -> origin/main
+hint: Diverging branches can't be fast-forwarded, you need to either:
+hint: 
+hint: 	git merge --no-ff
+hint: 
+hint: or:
+hint: 
+hint: 	git rebase
+hint: 
+hint: Disable this message with "git config advice.diverging false"
+fatal: Not possible to fast-forward, aborting.
+```
+
+It is best to try to avoid them. In case it happens, you need to first try to merge the changes. Go to *Actions* →  *Merge* and select *Tracking branch*, *origin/main*. You will get another error message, such as:
+
+```
+Auto-merging hello.txt
+CONFLICT (content): Merge conflict in hello.txt
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+Now open the file(s) that are mentioned in the message in a text editor and edit them by hand, keeping the parts of the files you need. The conflicting parts will be in between lines of of `>>>>`, `====` and `<<<<` symbols. Once you remove the parts you don't need (including the separators), you can solve the conflict by committing the changed files.
+The title of the commit will be made automatically.
+After committing, it will allow you to push the resolved changes back to GitLab.
 
 ### Forks and merge requests
 
@@ -391,7 +488,7 @@ After you have your own fork, it is the same as having your own personal reposit
 
 14. *Make a merge request*
 
-If you are ready to ask the upstream developers to incorporate your code into their repository, go to the *Merge Requests* tab and press the blue *New merge request* button. Select your `main` branch of your fork as the source.
+If you are ready to ask the upstream developers to incorporate your code into their repository, go to the *Code* → *Merge Requests* tab and press the blue *New merge request* button. Select your `main` branch of your fork as the source.
 
 <!-- ![New pull request button](figs/GitHub-pr.png) -->
 
@@ -405,27 +502,21 @@ Then it's up to the upstream developers to perform a code review and either acce
 **Tip**: For code review, GitLab also has special tools. If you look at the *Changes* tab of a merge request, you will see that you can press a bubble button next to any line of code and write a comment about it. Once finished, there is a "Submit review" button at the bottom to send all comments at once.
 ```
 
-### Other Git GUI functionality
+### Other Git Cola functionality
 
-You might run into a situation when you have made changes in tracked files, but do not want to keep some of the changes. You can revert one file by selecting it in Git GUI, then clicking *Commit* → *Revert changes*.
+You might run into a situation when you have made changes in tracked files, but do not want to keep some of the changes. You can revert one file by right-clicking on it and selecting *Revert Unstaged Edits...*.
 
-```{block, type="alert alert-info"}
-**Tip**: The command line equivalent is `git checkout \-\- path/to/file.ext`, or if you want to reset all changed files, `git reset \-\-hard`.
-```
+The command line equivalent is `git checkout \-\- path/to/file.ext`, or if you want to reset all changed files, `git reset \-\-hard`.
 
-Git GUI not only provides a way to make, push and pull commits, but also to visualise the commit history of your repository in a tree graph. Go to *Repository* → *Visualise Master's History* to see it. For larger and more complex projects with lots of contributors and merges, it might look like some sort of a subway map:
+Git Cola not only provides a way to make, push and pull commits, but also to visualise the commit history of your repository in a tree graph. There are two ways to do it. The first is to go to *Branch* → *Visualise Current Branch...*. For larger and more complex projects with lots of contributors and merges, it might look like some sort of a subway map:
 
 ![Git GUI history (gitk)](figs/git_gui_gitk.png)
 
-```{block, type="alert alert-info"}
-**Tip**: The command line equivalent is `git log`.
-```
+This visualisation tool is called `gitk` and is the same (old-fashioned) tools that Git GUI uses as well. There is a slightly more fancy way to visualise history in Git Cola by going to *View* → *DAG...*, which also shows the history as a clickable dynamic graph.
 
 The history view also allows you to reset the state of the repository to any previous commit by using the context menu. Note, however, that you can only push if you are on the latest commit. So the easiest way to revert changes is to copy over the files to a temporary directory outside of git, reset back, and move the files back into your repository.
 
-```{block, type="alert alert-info"}
-**Tip**: A few more options are available from the command line. `git revert <commit>` will undo changes from a given commit, where `<commit>` is the commit ID (you can get commit IDs from `git log`, they look like a long string of letters and numbers). `git checkout <commit> \-\- path/to/file.ext` will reset a single file to the state it was at the given commit.
-```
+The command line equivalent is `git log`, though it does not show a graph view. You can also run `gitk` from the terminal directly. A few more options are available from the command line. `git revert <commit>` will undo changes from a given commit, where `<commit>` is the commit ID (you can get commit IDs from `git log`, they look like a long string of letters and numbers). `git checkout <commit> \-\- path/to/file.ext` will reset a single file to the state it was at the given commit.
 
 You can also browse the history of a repository from your Git hosting service, and GitHub/GitLab even allow editing files from a web interface.
 
