@@ -176,6 +176,15 @@ You can also use more complex IDEs for Python scripting, such as [PyCharm](https
 
 You will learn more about Python IDEs later in the course. For now, we will stick with using *Google Colab* to run Python code.
 
+# The overall system architecture
+
+
+![System architecture graph](../IntroToRaster/figs/geoscripting-system-overview.svg){width=100%}
+
+To recap, the overall system architecture is comprised of integrated development environments (IDE), engines, packages, bindings, and libraries. Let's start with the engine, the core program that executes the foundation or crucial tasks of the programming language. The most relevant engines in this course are Python and R. To interact with the engine, we can either code in the command line directly or we can use an IDE, which provides many tools and features for working with the engine integrated in a single environment. An IDE allows the developer to write code, test it, and debug it all in a single software application.
+
+We then install packages in the IDE, these are collections of related code files, libraries, and resources that are related and compatible with each other. Libraries are pre-written code that provide specific functions and services. The idea of libraries and packages is to make coding more efficient by the reuse of common functions.
+
 # What are packages?
 
 Packages extend the functionality of a programming language by providing new functions (and/or datasets).
